@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "DiffPALM"
+  site-url: "https://Bitbol-Lab.github.io/DiffPALM"
+  description: "Code for 'Pairing interacting protein sequences using masked language modeling' by U. Lupo, D. Sgarbossa, and A.-F. Bitbol"
+  repo-branch: main
+  repo-url: "https://github.com/Bitbol-Lab/DiffPALM"
