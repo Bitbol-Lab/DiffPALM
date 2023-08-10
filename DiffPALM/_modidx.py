@@ -5,4 +5,5 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://Bitbol-Lab.github.io',
                 'git_url': 'https://github.com/Bitbol-Lab/DiffPALM',
                 'lib_path': 'DiffPALM'},
-  'syms': {'DiffPALM.core': {'DiffPALM.core.foo': ('core.html#foo', 'DiffPALM/core.py')}}}
+  'syms': { 'DiffPALM.core': { 'DiffPALM.core.bar': ('core.html#bar', 'DiffPALM/core.py'),
+                               'DiffPALM.core.foo': ('core.html#foo', 'DiffPALM/core.py')}}}
