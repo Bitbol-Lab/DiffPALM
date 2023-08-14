@@ -5,12 +5,13 @@ __all__ = ['sample_uniform', 'sinkhorn_norm', 'log_sinkhorn_norm', 'gumbel_sinkh
            'MSA_inverse_permutation', 'MSA_inverse_permutation_batch', 'inverse_permutation']
 
 # %% ../nbs/01_gumbel_sinkhorn_utils.ipynb 3
+# Modified from: https://github.com/perrying/gumbel-sinkhorn
+
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.sparse import coo_matrix
 import torch
 from typing import Tuple
-
 
 def sample_uniform(log_alpha_size: torch.Size):
     return torch.rand(log_alpha_size)
