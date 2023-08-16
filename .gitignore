@@ -149,3 +149,9 @@ checklink/cookies.txt
 
 # Quarto
 .quarto
+
+# Results folder
+nbs/Results
+
+# Jupyterlab-lsp
+.virtual_documents

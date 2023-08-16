@@ -4,6 +4,6 @@ project:
 website:
   title: "DiffPALM"
   site-url: "https://Bitbol-Lab.github.io/DiffPALM"
-  description: "Code for 'Pairing interacting protein sequences using masked language modeling' by U. Lupo, D. Sgarbossa, and A.-F. Bitbol"
+  description: "Differentiable Pairing using Alignment-based Language Models"
   repo-branch: main
   repo-url: "https://github.com/Bitbol-Lab/DiffPALM"
