@@ -1,10 +1,6 @@
 repos:
 - repo: https://github.com/fastai/nbdev
-  rev: 2.2.10
+  rev: 2.3.11
   hooks:
   - id: nbdev_clean
   - id: nbdev_export
-- repo: https://github.com/psf/black
-  rev: 22.10.0
-  hooks:
-  - id: black
