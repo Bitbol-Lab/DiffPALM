@@ -41,11 +41,14 @@ def DCN(x):
 
 # %% ../nbs/00_core.ipynb 5
 class PermutationsMixin:
-    """Mixin class for validating input and plotting."""
+    """Mixin class for validating input and plotting the results of the optimization."""
 
     mask_idx = 32
 
     def _init_log_alpha(self, skip=False):
+        """Intialize log_alpha as a list of matrices of shape (d, d) where d is the
+        depth of the species MSA. The matrices are initialized with standard normal entries.
+        """
         if not skip:
             # Permutations restricted to species
             self.log_alpha = [
@@ -56,6 +59,7 @@ class PermutationsMixin:
             ]
 
     def _validator(self, input_left, input_right, fixed_pairings=None):
+        """Validate input MSAs and check fixed pairings."""
         # Validate input MSAs
         depth_left, length_left, alphabet_size_left = input_left.shape[1:]
         depth_right, length_right, alphabet_size_right = input_right.shape[1:]
@@ -191,6 +195,7 @@ class PermutationsMixin:
         output_dir,
         only_loss_plot,
     ):
+        """Plot the results of the optimization in real time."""
         n_correct = [sum(idx == target_idx) for idx in list_idx[::batch_size]]
 
         cmap = cm.get_cmap("Blues")
@@ -263,10 +268,13 @@ class PermutationsMixin:
 # %% ../nbs/00_core.ipynb 6
 class DiffPALM(torch.nn.Module, PermutationsMixin):
     """
-    Class which permutes the pairs between two concatenated MSAs and backpropagate the loss on
-    the amino-acids directly to the permutation matrix to get the correct permutation of interacting
-    pairs. The input to the forward pass must be MSAs of one-hot encodings of shape (1,D,L,alphabet)
-    -- i.e., every amino-acid in the MSA is a one-hot vector.
+    Permute all the pairs between two concatenated MSAs (for each species), randomly mask the left MSA
+    and compute the MLM loss. Backpropagate the loss on the permutation matrix and iterate the process
+    to get the correct permutation of interacting pairs.
+    `species_sizes`: list of species sizes for the paired MSA
+    `p_mask`: token masking probability for left MSA
+    `random_seed`: random seed
+    `device`: device to use for computations
     """
 
     def __init__(self, species_sizes, *, p_mask=0.7, random_seed=42, device="cuda"):
@@ -291,12 +299,13 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
 
     def forward(self, input_ord, input_right, positive_examples=None):
         """
-        Compute the output logits of randomly masked tokens.
+        Mask input MSA and concatenate with fixed MSA. Then compute output logits
+        for the masked positions using MSA-Transformer.
 
-        input_left: variable input (MSA to mask and permute)    --> (B, D, L1 + 1, 33)
-        input_right: fixed input (MSA of pairs: no masking)      --> (B, D, L2 + 1, 33)
-        positive_examples: if not None it's a concatenation of correct pairs to use as context
-                           (not masked)                        --> (B, D, L1 + L2 + 1, 33)
+        `input_ord`: variable input at each iteration (masked)  --> (B, D, L1 + 1, 33)
+        `input_right`: fixed input (no masking)                 --> (B, D, L2 + 1, 33)
+        `positive_examples`: if not None it's a concatenation of correct pairs to use
+                             as context (not masked)            --> (B, D, L1 + L2 + 1, 33)
         """
         # One-hot vector to use as mask in the MSA
         vec_mask = torch.zeros(input_ord.shape[-1]).to(self.device)
@@ -360,6 +369,33 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         save_all_figs=False,
         only_loss_plot=False,
     ):
+        """
+        Train the model using the input MSAs (`input_left`, `input_right`) and the fixed pairings.
+
+        `fixed_pairings`: list of lists of pairs of paired indices relative to each species
+                            Format: [[(i, j), ...], ...]
+        `init_log_alpha`: if True initialize log_alpha with random values
+        `std_init`: standard deviation of the normal distribution used to initialize log_alpha
+        `epochs`: number of epochs of the training
+        `optimizer_name`: name of the optimizer to use
+        `optimizer_kwargs`: kwargs of the optimizer
+        `tau`: temperature parameter for the Sinkhorn operator
+        `n_sink_iter`: number of Sinkhorn iterations
+        `noise`: if True add noise to the Gumbel-Matching algorithm
+        `noise_std`: if True use a fixed noise_std for the noise matrices
+        `noise_factor`: noise correction factor
+        `noise_scheduler`: if True use the optimizer learning rate to scale the noise_factor
+        `scheduler_name`: name of the learning rate scheduler to use
+        `scheduler_kwargs`: kwargs of the scheduler
+        `batch_size`: batch size for the training (number of different masks to use at each epoch)
+        `use_rand_perm`: if True use random permutations on the input MSAs to change the order of
+                         the sequences at each epoch
+        `mean_centering`: if True mean-center log_alphas at each epoch
+        `tar_loss`: if not None use this value as target loss for the training
+        `output_dir`: if not None save the plots in this directory
+        `save_all_figs`: if True save all the plots at each batch_size
+        `only_loss_plot`: if True save only the loss plot at each batch_size
+        """
         self._validator(input_left, input_right, fixed_pairings=fixed_pairings)
         if not sum(self._effective_depth_not_fixed):
             print(
@@ -639,12 +675,12 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         batch_size=1,
     ):
         """
-        Function that computes the target value of the loss function using ordered pairs of input_left
-        and input_right.
-        `kind_loss` defines the loss function:
-            = "average" or None -> average loss over `batch_size` iterations
-            = "per_sequence" -> per-sequence average loss over `batch_size` iterations
-            = "perplexity" -> perplexity of the non-masked input concatenation.
+        Function that computes the target value of the loss function using the pairs of `input_left`
+        and `input_right` ordered as in the input. The loss is computed using the MSA-Transformer.
+        `fixed_pairings`: list of lists of pairs of paired indices relative to each species
+        `positive_examples`: if not None it's a concatenation of correct pairs to use
+                             as context (not masked)
+        `batch_size`: batch size for the target loss (number of different masks to use at each epoch)
         """
         self._validator(input_left, input_right, fixed_pairings=fixed_pairings)
         pbar = tqdm(range(batch_size))
