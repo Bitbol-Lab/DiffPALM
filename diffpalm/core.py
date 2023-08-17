@@ -395,6 +395,14 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         `output_dir`: if not None save the plots in this directory
         `save_all_figs`: if True save all the plots at each batch_size
         `only_loss_plot`: if True save only the loss plot at each batch_size
+
+        Outputs:
+        `losses`: list of loss values for each iteration (`batch_size`*`epochs`)
+        `list_lr`: list of the learning rate used at each epoch
+        `list_idx`: list of the indexes of the predicted pairs at each iteration (`batch_size`*`epochs`)
+        `mats`: list of the permutation matrices at each epoch (hard permutation)
+        `mats_gs`: list of the soft-permutation matrices at each epoch
+        `list_log_alpha`: list of the log_alpha matrices at each epoch
         """
         self._validator(input_left, input_right, fixed_pairings=fixed_pairings)
         if not sum(self._effective_depth_not_fixed):
@@ -469,7 +477,7 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         mats, mats_gs = [], []
         list_idx = []
         list_log_alpha = []
-        list_scheduler = []
+        list_lr = []
         gs_matching_mat = None
         target_idx = torch.arange(
             self._depth_total, dtype=torch.float, device=self.device
@@ -656,13 +664,14 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
                             else:
                                 scheduler.step()
 
-                        list_scheduler.append(optimizer.param_groups[0]["lr"])
+                        list_lr.append(optimizer.param_groups[0]["lr"])
 
         return (
             losses,
-            list_scheduler,
-            [target_idx_np, list_idx],
-            [mats, mats_gs],
+            list_lr,
+            list_idx,
+            mats,
+            mats_gs,
             list_log_alpha,
         )
 
@@ -681,6 +690,8 @@ class DiffPALM(torch.nn.Module, PermutationsMixin):
         `positive_examples`: if not None it's a concatenation of correct pairs to use
                              as context (not masked)
         `batch_size`: batch size for the target loss (number of different masks to use at each epoch)
+
+        Output: list of target loss values for each masking iteration (`batch_size`)
         """
         self._validator(input_left, input_right, fixed_pairings=fixed_pairings)
         pbar = tqdm(range(batch_size))
