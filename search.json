@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "datasets.html",
+    "href": "datasets.html",
+    "title": "datasets",
+    "section": "",
+    "text": "source\n\ndataset_tokenizer\n\n dataset_tokenizer (dataset, device='cuda')\n\nFunction that given a dictionary dataset of MSAs (initial MSA, blocks, positive examples) tokenizes each MSA and return them in a dictionary with the same keys.\n\nsource\n\n\ntokenizer\n\n tokenizer (list_msa, device='cuda')\n\nFunction that given an MSA (seen as a list of tuples) tokenizes it using the MSA Transformer tokenizer and transform the tokens into one-hot encodings.\n\nsource\n\n\ngenerate_dataset\n\n generate_dataset (parameters, msa_data, get_species_name,\n                   return_species=False)\n\nFunction that given the two full paired MSAs of interacting sequences (seen as a list of tuples) creates the dataset (dictionary of MSAs, both “left” and “right” ones), made of:\n\n“msa”: the MSA used to start the training of the permutation matrix.\n“positive_examples”: MSA of correct pairs to use as context during the training. It can be None if we don’t want any context.\n\nWe have to specify if we either want the list of blocks or the positive examples by setting the value of generate_blocks to True or False.\nWe can also limit the depth of the MSA by changing limit_depth. Keep in mind that the maximum limit of sequences depends on the GPU memory."
+  },
+  {
+    "objectID": "gumbel_sinkhorn_utils.html",
+    "href": "gumbel_sinkhorn_utils.html",
+    "title": "gumbel_sinkhorn_utils",
+    "section": "",
+    "text": "source\n\ninverse_permutation\n\n inverse_permutation (X, permutation_matrix)\n\n\nsource\n\n\nMSA_inverse_permutation_batch\n\n MSA_inverse_permutation_batch (X, permutation_matrices)\n\n\nsource\n\n\nMSA_inverse_permutation\n\n MSA_inverse_permutation (X, permutation_matrix)\n\n\nsource\n\n\ngumbel_matching\n\n gumbel_matching (log_alpha:torch.Tensor, noise_mat:torch.Tensor=0,\n                  noise:bool=True, noise_factor:float=1.0,\n                  noise_std:bool=False, rand_perm=None)\n\n\nsource\n\n\ngen_assignment\n\n gen_assignment (cost_matrix)\n\n\nsource\n\n\ngumbel_sinkhorn\n\n gumbel_sinkhorn (log_alpha:torch.Tensor, noise_mat:torch.Tensor=0,\n                  tau:float=1.0, n_iter:int=20, noise:bool=True,\n                  noise_factor:float=1.0, noise_std:bool=False,\n                  rand_perm=None)\n\n\nsource\n\n\nlog_sinkhorn_norm\n\n log_sinkhorn_norm (log_alpha:torch.Tensor, n_iter:int=20)\n\n\nsource\n\n\nsinkhorn_norm\n\n sinkhorn_norm (alpha:torch.Tensor, n_iter:int=20)\n\n\nsource\n\n\nsample_uniform\n\n sample_uniform (log_alpha_size:torch.Size)"
+  },
+  {
+    "objectID": "msa_parsing.html",
+    "href": "msa_parsing.html",
+    "title": "msa_parsing",
+    "section": "",
+    "text": "source\n\nread_msa\n\n read_msa (filename:str, nseq:int)\n\nReads the first nseq sequences from an MSA file, automatically removes insertions.\n\nsource\n\n\nremove_insertions\n\n remove_insertions (sequence:str)\n\nRemoves any insertions into the sequence. Needed to load aligned sequences in an MSA.\n\nsource\n\n\nread_sequence\n\n read_sequence (filename:str)\n\nReads the first (reference) sequences from a fasta or MSA file."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "DiffPALM",
+    "section": "",
+    "text": "Paralog matching method described in “Pairing interacting protein sequences using masked language modeling” (Lupo, Sgarbossa, and Bitbol, 2023). The MSA Transformer model used here was introduced in (Rao el al, 2021)."
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "DiffPALM",
+    "section": "Install",
+    "text": "Install\nClone this repository on your local machine by running and move inside the root folder. We recommend creating and activating a dedicated conda or virtualenv Python virtual environment.\ngit clone git@github.com:Bitbol-Lab/DiffPALM.git\nand move inside the root folder. We recommend creating and activating a dedicated conda or virtualenv Python virtual environment. Then, make an editable install of the package:\npython -m pip install -e ."
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "DiffPALM",
+    "section": "How to use",
+    "text": "How to use\nSee the _example_prokaryotic.ipynb notebook for an example of paired MSA optimization in the case of well-known prokaryotic datasets, for which ground truth matchings are given by genome proximity."
+  },
+  {
+    "objectID": "index.html#citation",
+    "href": "index.html#citation",
+    "title": "DiffPALM",
+    "section": "Citation",
+    "text": "Citation\nOur work can be cited using the following BibTeX entry:\n@article{lupo2023pairing,\n  title={Pairing interacting protein sequences using masked language modeling},\n  author={Lupo, Umberto and Sgarbossa, Damiano and Bitbol, Anne-Florence},\n  year={2023},\n  journal={bioRxiv},\n  doi={10.1101/2023.08.14.553209 }\n}"
+  },
+  {
+    "objectID": "index.html#nbdev",
+    "href": "index.html#nbdev",
+    "title": "DiffPALM",
+    "section": "nbdev",
+    "text": "nbdev\nThis project has been developed using nbdev."
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "core",
+    "section": "",
+    "text": "source\n\nDCN\n\n DCN (x)\n\n\nsource\n\n\nPermutationsMixin\n\n PermutationsMixin ()\n\nMixin class for validating input and plotting the results of the optimization.\n\nsource\n\n\nDiffPALM\n\n DiffPALM (species_sizes, p_mask=0.7, random_seed=42, device='cuda')\n\nPermute all the pairs between two concatenated MSAs (for each species), randomly mask the left MSA and compute the MLM loss. Backpropagate the loss on the permutation matrix and iterate the process to get the correct permutation of interacting pairs. species_sizes: list of species sizes for the paired MSA p_mask: token masking probability for left MSA random_seed: random seed device: device to use for computations"
+  }
+]
