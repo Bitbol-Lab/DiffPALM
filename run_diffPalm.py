@@ -44,9 +44,7 @@ if __name__ == "__main__":
 
 	DOCKER_SHARE_BASE_DIR = "/app/data/"
 	run_date1 = datetime.now().strftime("%Y_%b_%d")
-	#TO DO modify for docker - append docker base
 	RESULTS_DIR = Path (DOCKER_SHARE_BASE_DIR+run_date1)
-	print (' master output dir ', RESULTS_DIR)
 	RESULTS_DIR.mkdir(exist_ok=True)
 	
 	# set it based on gpu availability?
@@ -100,14 +98,12 @@ if __name__ == "__main__":
 	# save parameters for keeping track of texperiments
 	date = datetime.now().strftime("%Y_%m_%d-%H:%M:%S")
 	output_dir = RESULTS_DIR / date   # TO DO : NOT YET INITIALIZED
-	print ('creating output dir ', output_dir)
 	output_dir.mkdir() 
 	save_parameters(parameters_all, output_dir)
 
 
 	msa_data = read_data()
 
-	print ("done reading data")
 	# preprocess and clean up data
 	get_species_name = (lambda strn: strn.split("|")[1])
 
@@ -117,11 +113,9 @@ if __name__ == "__main__":
 	tokenized_dataset = dataset_tokenizer(dataset, device=DEVICE)
 	left_msa, right_msa = tokenized_dataset["msa"]["left"], tokenized_dataset["msa"]["right"]
 	positive_examples = tokenized_dataset["positive_examples"]
-	print ('data ready')
-		# initialize the model
+	# initialize the model
 	dpalm = DiffPALM(species_sizes, **parameters_init)
 
-	print ('data created training ')
 	save_all_figs=True # do we want to save it -give it as an option
 	tar_loss = dpalm.target_loss(
 			left_msa,
@@ -144,7 +138,6 @@ if __name__ == "__main__":
 							save_all_figs=True,
 							**parameters_train,
 							)
-	print ('after training setting results ')
 	results = {
 			"trainng_results": (losses, list_scheduler, shuffled_indexes, [mat_perm, mat_gs], list_log_alpha),
 			"target_loss": tar_loss,
