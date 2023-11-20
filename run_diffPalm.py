@@ -30,8 +30,8 @@ def read_data (data_flag = "HK-RR"):
 	# TO DO - form the input data path + pass it on
 
 	if data_flag == "HK-RR":
-		msa_data = [read_msa(data_in_dir+"data/HK-RR/HK_in_Concat_nnn.fasta", -1),
-			read_msa(data_in_dir+"data/HK-RR/RR_in_Concat_nnn.fasta", -1)]
+		msa_data = [read_msa(data_in_dir+"/HK-RR/HK_in_Concat_nnn.fasta", -1),
+			read_msa(data_in_dir+"/HK-RR/RR_in_Concat_nnn.fasta", -1)]
 
 	return msa_data
 
